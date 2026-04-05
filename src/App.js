@@ -1,8 +1,20 @@
-import { useRef } from 'react';
-import { motion, useInView, useScroll, useTransform, useSpring } from 'framer-motion';
+import { useRef, useEffect, useState } from 'react';
+import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import config from './config';
 import './styles/global.css';
 import './App.css';
+
+/* Preload critical above-fold images so they appear in sync */
+const PRELOAD_URLS = [
+  config.images.heroBg,
+  config.images.diyas,
+  config.images.temple,
+  config.images.card,
+];
+PRELOAD_URLS.forEach((url) => {
+  const img = new Image();
+  img.src = url;
+});
 
 /* Spring configs */
 const SPRING_BOUNCE = { type: 'spring', bounce: 0.2, duration: 2 };
@@ -20,17 +32,13 @@ function Hero() {
 
   /* Scroll progress through the hero section */
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const spring = { stiffness: 70, damping: 22 };
 
-  /* Temple: drifts DOWN (slower than scroll = sense of depth) */
-  const templeY = useSpring(useTransform(scrollYProgress, [0, 0.6], [0, 180]), spring);
-
-  /* Text: moves UP + fades out (foreground exits quickly) */
-  const textY = useSpring(useTransform(scrollYProgress, [0, 0.4], [0, -150]), spring);
+  /* Raw useTransform (no useSpring) — much lighter on scroll.
+     Springs recalculate physics every frame; transforms are just linear interpolation. */
+  const templeY = useTransform(scrollYProgress, [0, 0.6], [0, 180]);
+  const textY = useTransform(scrollYProgress, [0, 0.4], [0, -150]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.28], [1, 0]);
-
-  /* Diyas: move UP (mid-ground rate) */
-  const diyasY = useSpring(useTransform(scrollYProgress, [0, 0.5], [0, -100]), spring);
+  const diyasY = useTransform(scrollYProgress, [0, 0.5], [0, -100]);
 
   /* Stagger variants for fold1 content on the card */
   const container = {
@@ -161,6 +169,18 @@ function GoldenSection() {
   const storyRef = useRef(null);
   const storyInView = useInView(storyRef, { once: true, amount: 0.2 });
 
+  /* Preload gallery images when golden section intro enters viewport */
+  const [galleryPreloaded, setGalleryPreloaded] = useState(false);
+  useEffect(() => {
+    if (introInView && !galleryPreloaded) {
+      config.gallery.flat().forEach((url) => {
+        const img = new Image();
+        img.src = `${url}?width=480`;
+      });
+      setGalleryPreloaded(true);
+    }
+  }, [introInView, galleryPreloaded]);
+
   const { images, introTitle } = config;
 
   return (
@@ -189,23 +209,16 @@ function GoldenSection() {
         <div className="golden__intro-big">{introTitle[2]}</div>
       </motion.div>
 
-      {/* WHERE OUR STORY BEGINS */}
-      <div className="golden__story" ref={storyRef}>
+      {/* WHERE OUR STORY BEGINS — CSS-driven animation, no per-letter motion.span */}
+      <div className={`golden__story ${storyInView ? 'story--visible' : ''}`} ref={storyRef}>
         {config.storyWords.map((word, wi) => (
           <div className="story__row" key={wi}>
             {word.text.split('').map((ch, li) => {
               const depth = word.depths[li];
-              const initY = [0, 50, 100, 150][depth];
-              const initOpacity = [1, 0.5, 0.2, 0.1][depth];
               return (
-                <motion.span key={li} className="sl"
-                  initial={{ opacity: initOpacity, y: initY }}
-                  animate={storyInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{
-                    type: 'spring', stiffness: 80, damping: 15,
-                    delay: wi * 0.15 + li * 0.07,
-                  }}
-                >{ch}</motion.span>
+                <span key={li} className={`sl sl--d${depth}`}
+                  style={{ transitionDelay: `${wi * 0.15 + li * 0.07}s` }}
+                >{ch}</span>
               );
             })}
           </div>
@@ -237,15 +250,15 @@ const SHAPES = ['pt', 'sq', 'sq', 'pt'];
 function GalleryColumn({ images: imgs, index }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-  const offset = Math.round(COL_RATIOS[index] * vh);
-  const y = useTransform(scrollYProgress, [0, 1], [offset, -offset * 0.5]);
+  /* Cache vh once — avoid reading window.innerHeight on every render */
+  const offsetRef = useRef(Math.round(COL_RATIOS[index] * (typeof window !== 'undefined' ? window.innerHeight : 800)));
+  const y = useTransform(scrollYProgress, [0, 1], [offsetRef.current, -offsetRef.current * 0.5]);
 
   return (
     <motion.div className="gallery__col" style={{ y }} ref={ref}>
       {imgs.map((src, ii) => (
         <img key={ii} className={`gallery__img ${SHAPES[ii % SHAPES.length]}`}
-          src={`${src}?width=480`} alt="" loading="lazy" />
+          src={`${src}?width=480`} alt="" loading="lazy" decoding="async" />
       ))}
     </motion.div>
   );

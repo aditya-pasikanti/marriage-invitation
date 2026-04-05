@@ -85,6 +85,17 @@
   justify-content: center;
   z-index: 3;
   pointer-events: none;
+  will-change: transform;
+  /* Clip temple so it never extends past the card-wrap top.
+     Height = card-wrap top minus temple-wrap top. */
+  height: calc(170vh - 60vh);
+  overflow: hidden;
+}
+
+/* GPU-promote all scroll-driven elements */
+.hero__text-wrap,
+.hero__diyas-wrap {
+  will-change: transform, opacity;
 }
 
 .hero__temple {
@@ -95,8 +106,8 @@
 }
 
 /* 3D Card – floor carpet emerging from temple base.
-   transform-origin defaults to center so the bottom comes
-   TOWARD the viewer, creating the floor/carpet perspective. */
+   Temple (z:3) is in front but clipped at this card's top boundary.
+   Card (z:2) sits behind — they connect seamlessly at the seam. */
 .hero__card-wrap {
   position: absolute;
   top: 170vh;
@@ -111,7 +122,7 @@
 
 .hero__card {
   width: 55%;
-  min-height: 80vh;
+  height: 80vh;
   background-size: cover;
   transform: perspective(700px) rotateX(39deg);
   display: flex;
@@ -171,7 +182,7 @@
 .bless__text {
   font-family: 'Cormorant Upright', serif;
   font-size: clamp(18px, 3vw, 32px);
-  font-weight: 500;
+  font-weight: 900;
   color: rgb(230, 195, 122);
   text-align: center;
   line-height: 1.8;
@@ -312,6 +323,34 @@
   color: rgb(224, 76, 106);
   display: inline-block;
   line-height: 1;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Depth-based initial states (before in-view) */
+.sl--d0 {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sl--d1 {
+  opacity: 0.5;
+  transform: translateY(50px);
+}
+
+.sl--d2 {
+  opacity: 0.2;
+  transform: translateY(100px);
+}
+
+.sl--d3 {
+  opacity: 0.1;
+  transform: translateY(150px);
+}
+
+/* When parent gets the visible class, animate all letters to final state */
+.story--visible .sl {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Gallery (inside golden) */
@@ -562,6 +601,7 @@
 
   .hero__temple-wrap {
     top: 62vh;
+    height: calc(185svh - 62vh);
   }
 
   .hero__temple {
@@ -578,8 +618,9 @@
   }
 
   .hero__card {
-    min-height: 65svh;
+    height: 65svh;
     width: 70%;
+    padding: clamp(6rem, 8vw, 7rem) 24px clamp(0rem, 10vw, 8rem);
   }
 
   .bless__fold2 {
@@ -648,7 +689,7 @@
    ═══════════════════════════════════════════ */
 @media (max-width: 480px) {
   .hero {
-    height: 220svh;
+    height: 250svh;
     min-height: 1000px;
   }
 
@@ -670,7 +711,8 @@
   }
 
   .hero__temple-wrap {
-    top: 56vh;
+    top: 70vh;
+    height: calc(150svh - 70vh);
   }
 
   .hero__temple {
@@ -689,8 +731,12 @@
 
   .hero__card {
     justify-content: center;
-    min-height: 70svh;
+    height: 100svh;
     width: 80%;
+  }
+
+  .bless__text {
+    font-size: 16px;
   }
 
   .bless__fold2 {
@@ -780,7 +826,7 @@
 
 @media (max-width: 400px) {
   .hero__card {
-    min-height: 80svh;
+    height: 80svh;
   }
 }
 
