@@ -736,7 +736,11 @@
   }
 
   .bless__text {
-    font-size: 16px;
+    font-size: 18px;
+  }
+
+  .hero__card-content {
+    padding-inline: 1rem;
   }
 
   .bless__fold2 {
@@ -752,7 +756,7 @@
   }
 
   .bless__vinayagar {
-    width: 110px;
+    width: 10rem;
   }
 
   .bless__fold2 {
