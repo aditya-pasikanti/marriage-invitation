@@ -231,7 +231,7 @@ function GoldenSection() {
 const SHAPES = ['pt', 'sq', 'sq', 'pt'];
 const COL_DURATIONS = ['28s', '22s', '18s', '22s', '28s'];
 
-function GalleryColumn({ images: imgs, index }) {
+function GalleryColumn({ images: imgs, index, loaded }) {
   const direction = index % 2 === 0 ? 'up' : 'down';
   const doubled = [...imgs, ...imgs];
 
@@ -241,7 +241,7 @@ function GalleryColumn({ images: imgs, index }) {
     >
       {doubled.map((src, ii) => (
         <img key={ii} className={`gallery__img ${SHAPES[ii % SHAPES.length]}`}
-          src={src} alt="" loading="lazy" decoding="async" />
+          src={loaded ? src : undefined} alt="" decoding="async" />
       ))}
     </div>
   );
@@ -249,13 +249,16 @@ function GalleryColumn({ images: imgs, index }) {
 
 function GalleryInner() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { amount: 0 });
+  /* Trigger image loading when gallery is within 500px of viewport — once, permanently */
+  const isNear = useInView(ref, { once: true, margin: '500px 0px' });
+  /* Toggle animation play/pause based on actual visibility */
+  const isVisible = useInView(ref, { amount: 0 });
 
   return (
-    <div className={`gallery ${isInView ? 'gallery--active' : ''}`} ref={ref}>
+    <div className={`gallery ${isVisible ? 'gallery--active' : ''}`} ref={ref}>
       <div className="gallery__row">
         {config.gallery.map((col, ci) => (
-          <GalleryColumn key={ci} images={col} index={ci} />
+          <GalleryColumn key={ci} images={col} index={ci} loaded={isNear} />
         ))}
       </div>
     </div>
