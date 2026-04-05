@@ -1,16 +1,11 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import config from './config';
 import './styles/global.css';
 import './App.css';
 
-/* Preload critical above-fold images so they appear in sync */
-const PRELOAD_URLS = [
-  config.images.heroBg,
-  config.images.diyas,
-  config.images.temple,
-  config.images.card,
-];
+/* Preload only truly above-fold images */
+const PRELOAD_URLS = [config.images.heroBg, config.images.diyas, config.images.temple];
 PRELOAD_URLS.forEach((url) => {
   const img = new Image();
   img.src = url;
@@ -144,7 +139,7 @@ function Blessings() {
         ref={ref} variants={container}
         initial="hidden" animate={isInView ? 'visible' : 'hidden'}
       >
-        <motion.img variants={child} className="bless__garland" src={images.garland} alt="" />
+        <motion.img variants={child} className="bless__garland" src={images.garland} alt="" loading="lazy" decoding="async" />
         <motion.span variants={child} className="bless__family-line">{groom.relation}</motion.span>
         <motion.span variants={child} className="bless__family-line">{groom.parents}</motion.span>
         <motion.div variants={child} className="bless__big-name">{groom.name}</motion.div>
@@ -169,29 +164,17 @@ function GoldenSection() {
   const storyRef = useRef(null);
   const storyInView = useInView(storyRef, { once: true, amount: 0.2 });
 
-  /* Preload gallery images when golden section intro enters viewport */
-  const [galleryPreloaded, setGalleryPreloaded] = useState(false);
-  useEffect(() => {
-    if (introInView && !galleryPreloaded) {
-      config.gallery.flat().forEach((url) => {
-        const img = new Image();
-        img.src = `${url}?width=480`;
-      });
-      setGalleryPreloaded(true);
-    }
-  }, [introInView, galleryPreloaded]);
-
   const { images, introTitle } = config;
 
   return (
     <section className="golden">
-      <div className="golden__bg" style={{ backgroundImage: `url(${images.brideGroomBg})` }} />
-      <motion.img className="golden__diyas golden__diyas--l" src={images.diyas} alt=""
+      <img className="golden__bg" src={images.brideGroomBg} alt="" loading="lazy" decoding="async" />
+      <motion.img className="golden__diyas golden__diyas--l" src={images.diyas} alt="" loading="lazy" decoding="async"
         initial={{ opacity: 0, x: -120, y: -80 }}
         animate={introInView ? { opacity: 1, x: 0, y: 0 } : {}}
         transition={{ ...SPRING_BOUNCE, duration: 1.6 }}
       />
-      <motion.img className="golden__diyas golden__diyas--r" src={images.diyas} alt=""
+      <motion.img className="golden__diyas golden__diyas--r" src={images.diyas} alt="" loading="lazy" decoding="async"
         initial={{ opacity: 0, x: 120, y: -80 }}
         animate={introInView ? { opacity: 1, x: 0, y: 0 } : {}}
         transition={{ ...SPRING_BOUNCE, duration: 1.6, delay: 0.15 }}
@@ -229,7 +212,7 @@ function GoldenSection() {
       <GalleryInner />
 
       {/* Food image */}
-      <motion.img className="golden__food" src={images.food} alt="" loading="lazy"
+      <motion.img className="golden__food" src={images.food} alt="" loading="lazy" decoding="async"
         initial={{ opacity: 0, y: 60 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
@@ -241,32 +224,35 @@ function GoldenSection() {
 
 /* ════════════════════════════════════════
    Gallery columns (inside golden section)
+   Pure CSS auto-scrolling vertical carousel.
+   Images are duplicated for a seamless loop.
+   Odd columns scroll up, even columns scroll down.
    ════════════════════════════════════════ */
-/* Offsets scaled relative to viewport height for responsiveness.
-   No useSpring wrapper — raw useTransform is much lighter on scroll. */
-const COL_RATIOS = [0.55, 0.35, 0.17, 0.35, 0.55];
 const SHAPES = ['pt', 'sq', 'sq', 'pt'];
+const COL_DURATIONS = ['28s', '22s', '18s', '22s', '28s'];
 
 function GalleryColumn({ images: imgs, index }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  /* Cache vh once — avoid reading window.innerHeight on every render */
-  const offsetRef = useRef(Math.round(COL_RATIOS[index] * (typeof window !== 'undefined' ? window.innerHeight : 800)));
-  const y = useTransform(scrollYProgress, [0, 1], [offsetRef.current, -offsetRef.current * 0.5]);
+  const direction = index % 2 === 0 ? 'up' : 'down';
+  const doubled = [...imgs, ...imgs];
 
   return (
-    <motion.div className="gallery__col" style={{ y }} ref={ref}>
-      {imgs.map((src, ii) => (
+    <div className={`gallery__col gallery__col--${direction}`}
+      style={{ animationDuration: COL_DURATIONS[index] }}
+    >
+      {doubled.map((src, ii) => (
         <img key={ii} className={`gallery__img ${SHAPES[ii % SHAPES.length]}`}
-          src={`${src}?width=480`} alt="" loading="lazy" decoding="async" />
+          src={src} alt="" loading="lazy" decoding="async" />
       ))}
-    </motion.div>
+    </div>
   );
 }
 
 function GalleryInner() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { amount: 0 });
+
   return (
-    <div className="gallery">
+    <div className={`gallery ${isInView ? 'gallery--active' : ''}`} ref={ref}>
       <div className="gallery__row">
         {config.gallery.map((col, ci) => (
           <GalleryColumn key={ci} images={col} index={ci} />
@@ -300,7 +286,7 @@ function SaveTheDate() {
     <section className="std">
 
       <div className="std__details">
-        <div className="std__kolam" style={{ backgroundImage: `url(${images.kolam})` }} />
+        <img className="std__kolam" src={images.kolam} alt="" loading="lazy" decoding="async" />
         <motion.div className="std__content" ref={detailsRef}
           variants={stagger} initial="hidden" animate={detailsInView ? 'visible' : 'hidden'}
         >
@@ -329,10 +315,10 @@ function SaveTheDate() {
           animate={couplesInView ? { opacity: 1, y: 0 } : {}}
           transition={{ type: 'spring', bounce: 0.2, duration: 2.5 }}
         >
-          <img src={images.couples} alt="" loading="lazy" />
+          <img src={images.couples} alt="" loading="lazy" decoding="async" />
         </motion.div>
 
-        <div className="std__banner"><img src={images.banner} alt="" /></div>
+        <div className="std__banner"><img src={images.banner} alt="" loading="lazy" decoding="async" /></div>
 
         <motion.p className="std__request grad"
           initial={{ opacity: 0 }} animate={couplesInView ? { opacity: 1 } : {}}
