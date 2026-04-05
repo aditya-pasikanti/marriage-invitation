@@ -1,0 +1,65 @@
+.bridegroom {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  min-height: 100svh;
+}
+
+.bridegroom__bg {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.bridegroom__diyas {
+  position: absolute;
+  top: 0;
+  width: clamp(160px, 18vw, 280px);
+  height: 100%;
+  object-fit: contain;
+  object-position: top left;
+  z-index: 2;
+}
+.bridegroom__diyas--left { left: 0; }
+.bridegroom__diyas--right { right: 0; transform: scaleX(-1); }
+
+.bridegroom__content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 24px 60px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+.bridegroom__content.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.bridegroom__intro-small {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(20px, 3.5vw, 48px);
+  font-weight: 600;
+  color: rgb(224, 76, 106);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.bridegroom__intro-big {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(56px, 10vw, 120px);
+  font-weight: 600;
+  color: rgb(224, 76, 106);
+  line-height: 1.0;
+  text-align: center;
+}
+
+.bridegroom__food {
+  width: min(700px, 85vw);
+  height: auto;
+  object-fit: contain;
+  margin-top: 60px;
+}

@@ -1,38 +1,795 @@
-.App {
-  text-align: center;
+/* ═══════════════════════════════════════════
+   1. HERO (sky + temple + 3D card at bottom)
+   ═══════════════════════════════════════════ */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 290vh;
+  min-height: 1800px;
+  overflow: hidden;
+  background: #87CEEB;
 }
 
-.App-logo {
-  height: 40vmin;
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  background-size: 165%;
+  background-position: center top;
+}
+
+/* Text wrap owns absolute position + scroll parallax Y/opacity.
+   Inner hero__text is just layout. */
+.hero__text-wrap {
+  position: absolute;
+  top: 26vh;
+  left: 0;
+  width: 100%;
+  z-index: 5;
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.hero__text {
+  text-align: center;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.hero__name {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(52px, 10vw, 108px);
+  font-weight: 400;
+  color: rgb(82, 82, 82);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+}
+
+.hero__weds {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(24px, 4vw, 54px);
+  font-weight: 300;
+  color: rgb(82, 82, 82);
+  line-height: 1.6;
+  letter-spacing: 0.15em;
+}
+
+/* Diyas wrap owns absolute position + scroll parallax Y.
+   Inner hero__diyas img is just the visual. */
+.hero__diyas-wrap {
+  position: absolute;
+  top: 0;
+  z-index: 4;
+}
+
+.hero__diyas-wrap--l {
+  left: 0;
+}
+
+.hero__diyas-wrap--r {
+  right: 0;
+}
+
+.hero__diyas {
+  width: clamp(160px, 19.1vw, 281px);
+  height: clamp(260px, 32.5vw, 478px);
+  object-fit: contain;
+  object-position: top left;
+  display: block;
+}
+
+/* Temple wrap owns absolute position + scroll-parallax y.
+   Temple img is just its natural size inside the wrap. */
+.hero__temple-wrap {
+  position: absolute;
+  top: 60vh;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.hero__temple {
+  width: clamp(400px, 62vw, 895px);
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* 3D Card – floor carpet emerging from temple base.
+   transform-origin defaults to center so the bottom comes
+   TOWARD the viewer, creating the floor/carpet perspective. */
+.hero__card-wrap {
+  position: absolute;
+  top: 170vh;
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 107%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.hero__card {
+  width: 55%;
+  min-height: 80vh;
+  background-size: cover;
+  transform: perspective(700px) rotateX(39deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(4rem, 8vw, 7rem) 24px clamp(5rem, 10vw, 8rem);
+  gap: 8px;
+}
+
+.hero__card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 8px;
 }
 
-.App-link {
-  color: #61dafb;
+.hero__credit {
+  position: absolute;
+  bottom: 14px;
+  right: 24px;
+  font-family: sans-serif;
+  font-size: 10px;
+  color: rgb(238, 238, 238);
+  z-index: 10;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* ═══════════════════════════════════════════
+   2. BLESSINGS + INVITING + NAMES (red mandala card bg)
+   ═══════════════════════════════════════════ */
+.bless {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #2a0808 url('https://framerusercontent.com/images/ZrKMdp6WI7ax9IR0VJA7Ffcse4.webp') center top / cover no-repeat;
+}
+
+/* Fold 2: Garland at top → names */
+.bless__fold2 {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  height: 110vh;
+  padding: clamp(3rem, 8vw, 6rem) 24px clamp(40px, 6vw, 60px);
+}
+
+.bless__vinayagar {
+  width: 190px;
+  height: auto;
+  margin-bottom: 12px;
+}
+
+.bless__text {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(18px, 3vw, 32px);
+  font-weight: 500;
+  color: rgb(230, 195, 122);
+  text-align: center;
+  line-height: 1.8;
+}
+
+.bless__inviting {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(60px, 12vw, 140px);
+  font-weight: 500;
+  color: rgb(230, 195, 122);
+  text-align: center;
+  line-height: 1.0;
+  margin: 16px 0 8px;
+}
+
+.bless__garland {
+  position: absolute;
+  top: 0;
+  margin: 16px 0;
+  width: 100%;
+  height: clamp(400px, 80vh, 900px);
+  object-fit: cover;
+}
+
+.bless__big-name {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(42px, 8vw, 100px);
+  font-weight: 500;
+  color: rgb(230, 195, 122);
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.bless__weds {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(30px, 5.5vw, 72px);
+  font-weight: 500;
+  color: rgb(230, 195, 122);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.bless__family-line {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(30px, 5.5vw, 44px);
+  font-weight: 500;
+  color: rgb(230, 195, 122);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════
+   3. GOLDEN SECTION (intro + story + gallery + food)
+   All on saffron/golden background.
+   ═══════════════════════════════════════════ */
+.golden {
+  position: relative;
+  width: 100%;
+  background: #e8a830;
+}
+
+.golden__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.golden__diyas {
+  position: absolute;
+  top: 0;
+  width: clamp(140px, 16vw, 260px);
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  object-position: top left;
+  z-index: 2;
+}
+
+.golden__diyas--l {
+  left: 0;
+}
+
+.golden__diyas--r {
+  right: 0;
+}
+
+/* Intro text */
+.golden__intro {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(8rem, 18vw, 20rem) 24px 40px;
+}
+
+.golden__intro-small {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(20px, 3.5vw, 48px);
+  font-weight: 600;
+  color: rgb(224, 76, 106);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.golden__intro-big {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(56px, 10vw, 120px);
+  font-weight: 600;
+  color: rgb(224, 76, 106);
+  line-height: 1.0;
+  text-align: center;
+}
+
+/* WHERE OUR STORY BEGINS (inside golden) */
+.golden__story {
+  position: relative;
+  z-index: 3;
+  padding: clamp(40px, 6vw, 80px) 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(16px, 3vw, 36px);
+}
+
+.story__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(2px, 0.8vw, 8px);
+}
+
+.sl {
+  font-family: 'Tiny5', sans-serif;
+  font-size: clamp(18px, 5.5vw, 72px);
+  color: rgb(224, 76, 106);
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Gallery (inside golden) */
+.gallery {
+  position: relative;
+  width: 100%;
+  height: clamp(400px, 50vw, 700px);
+  overflow: hidden;
+  z-index: 3;
+  -webkit-mask: linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%);
+  mask: linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%);
+}
+
+.gallery__row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(6px, 1vw, 12px);
+  width: 100%;
+  padding: 0 clamp(8px, 2vw, 24px);
+}
+
+.gallery__col {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1vw, 12px);
+  width: clamp(120px, 16vw, 240px);
+  flex-shrink: 0;
+  will-change: transform;
+}
+
+.gallery__img {
+  width: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid rgba(230, 195, 122, 0.4);
+}
+
+.gallery__img.sq {
+  height: clamp(120px, 16vw, 240px);
+}
+
+.gallery__img.pt {
+  height: clamp(180px, 24vw, 360px);
+}
+
+/* Food (inside golden) */
+.golden__food {
+  position: relative;
+  z-index: 3;
+  display: block;
+  margin: 40px auto -20rem;
+  width: min(700px, 85vw);
+  height: auto;
+  object-fit: contain;
+}
+
+/* ═══════════════════════════════════════════
+   4. SAVE THE DATE (pink/salmon)
+   ═══════════════════════════════════════════ */
+.std {
+  width: 100%;
+  background: linear-gradient(180deg, #fff 0%, #fce8e6 15%, #f5d5cf 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.std__banner {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.std__banner img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.std__couples {
+  margin-top: clamp(-60px, -5vw, -80px);
+  z-index: 2;
+}
+
+.std__couples img {
+  width: clamp(260px, 50vw, 600px);
+  height: clamp(260px, 50vw, 600px);
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.std__request {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(18px, 2.8vw, 36px);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.8;
+  max-width: 660px;
+  padding: clamp(24px, 4vw, 48px) 24px;
+}
+
+.std__details {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.std__couples-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.std__kolam {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.std__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(60px, 17vw, 17rem) 24px clamp(80px, 10vw, 140px);
+  gap: clamp(40px, 6vw, 64px);
+}
+
+.std__title {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(52px, 11vw, 120px);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.std__grid {
+  display: flex;
+  justify-items: center;
+  gap: clamp(16px, 3vw, 40px);
+  width: 100%;
+}
+
+.std__event {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-top: 40px;
+}
+
+.std__center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.std__ev-title {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(28px, 5vw, 56px);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.std__ev-line {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(15px, 2.2vw, 24px);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.8;
+}
+
+.std__venue-label {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(28px, 4.5vw, 48px);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.std__flower {
+  width: clamp(180px, 28vw, 340px);
+  height: auto;
+  object-fit: contain;
+}
+
+/* Footer */
+.footer {
+  background: #111;
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer__a {
+  font-family: sans-serif;
+  font-size: 12px;
+  color: rgb(238, 238, 238);
+}
+
+.footer__b {
+  font-family: sans-serif;
+  font-size: 8px;
+  color: rgb(71, 71, 71);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — TABLET
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .hero {
+    height: 250svh;
+    min-height: 1200px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .hero__text-wrap {
+    top: 18vh;
+  }
+
+  .hero__name {
+    font-size: clamp(36px, 12vw, 80px);
+  }
+
+  .hero__weds {
+    font-size: clamp(18px, 5vw, 36px);
+  }
+
+  .hero__diyas {
+    width: clamp(100px, 25vw, 180px);
+    height: clamp(160px, 30vw, 300px);
+  }
+
+  .hero__temple-wrap {
+    top: 62vh;
+  }
+
+  .hero__temple {
+    width: clamp(250px, 85vw, 550px);
+  }
+
+  .hero__bg {
+    background-size: 280%;
+    background-position: center 10%;
+  }
+
+  .hero__card-wrap {
+    top: 185svh;
+  }
+
+  .hero__card {
+    min-height: 65svh;
+    width: 70%;
+  }
+
+  .bless__fold2 {
+    min-height: auto;
+  }
+
+  .bless__garland {
+    height: clamp(300px, 60vh, 600px);
+  }
+
+  .bless__big-name {
+    font-size: clamp(32px, 10vw, 70px);
+  }
+
+  .bless__inviting {
+    font-size: clamp(40px, 14vw, 100px);
+  }
+
+  .golden__diyas {
+    width: clamp(80px, 18vw, 140px);
+  }
+
+  .golden__intro-big {
+    font-size: clamp(40px, 12vw, 80px);
+  }
+
+  .gallery {
+    height: 500px;
+  }
+
+  .gallery__col {
+    width: clamp(80px, 18vw, 160px);
+  }
+
+  .std__content {
+    padding: clamp(12rem, 8vw, 100px) 24px clamp(180px, 10vw, 140px);
+  }
+
+  .std__grid {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .std__ev-title,
+  .std__venue-label {
+    font-size: clamp(35px, 4.5vw, 48px);
+    font-weight: bold;
+  }
+
+  .std__ev-line {
+    font-size: clamp(25px, 2.2vw, 24px);
+  }
+
+  .std__event {
+    padding-top: 0;
+  }
+
+  .std__couples-container {
+    padding-top: 6rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — MOBILE
+   ═══════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .hero {
+    height: 220svh;
+    min-height: 1000px;
+  }
+
+  .hero__text-wrap {
+    top: 30vh;
+  }
+
+  .hero__name {
+    font-size: clamp(28px, 14vw, 60px);
+  }
+
+  .hero__weds {
+    font-size: clamp(14px, 6vw, 28px);
+  }
+
+  .hero__diyas {
+    width: 130px;
+    height: auto;
+  }
+
+  .hero__temple-wrap {
+    top: 56vh;
+  }
+
+  .hero__temple {
+    width: 200%;
+  }
+
+  .hero__bg {
+    background-size: 200vh;
+    background-position: center top;
+  }
+
+  .hero__card-wrap {
+    top: 150svh;
+    width: 120%;
+  }
+
+  .hero__card {
+    justify-content: center;
+    min-height: 70svh;
+    width: 80%;
+  }
+
+  .bless__fold2 {
+    padding: 0 16px 40px;
+  }
+
+  .bless__big-name {
+    font-size: clamp(28px, 12vw, 60px);
+  }
+
+  .bless__inviting {
+    font-size: clamp(36px, 16vw, 80px);
+  }
+
+  .bless__vinayagar {
+    width: 110px;
+  }
+
+  .bless__fold2 {
+    height: auto;
+    padding-top: 5rem;
+  }
+
+  .bless__garland {
+    top: -6rem;
+    margin: 0;
+    height: auto;
+  }
+
+  .bless__family-line {
+    font-size: clamp(24px, 5.5vw, 36px);
+  }
+
+  .golden__intro {
+    padding: 14rem 16px 20px;
+  }
+
+  .golden__intro-big {
+    font-size: clamp(32px, 14vw, 60px);
+  }
+
+  .golden__diyas {
+    width: clamp(80px, 31vw, 141px);
+  }
+
+  .gallery {
+    height: 33rem;
+  }
+
+  .gallery__col {
+    width: clamp(60px, 20vw, 120px);
+  }
+
+  .gallery__img.sq {
+    height: clamp(60px, 20vw, 120px);
+  }
+
+  .gallery__img.pt {
+    height: clamp(90px, 30vw, 180px);
+  }
+
+  .std__couples img {
+    width: 70vw;
+    height: 70vw;
+  }
+
+  .std__title {
+    font-size: clamp(36px, 14vw, 70px);
+  }
+
+  .std__flower {
+    width: 60vw;
+    height: 60vw;
+  }
+
+  .golden__food {
+    margin-bottom: -10rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero__card {
+    padding: clamp(4rem, 8vw, 7rem) 24px clamp(2rem, 10vw, 8rem);
+    transform: perspective(700px) rotateX(39deg);
+  }
+}
+
+@media (max-width: 400px) {
+  .hero__card {
+    min-height: 80svh;
+  }
+}
+
+@media (max-width: 376px) {
+  .hero {
+    height: 260svh;
+  }
+
+  .hero__card {
+    height: 140svh;
   }
 }

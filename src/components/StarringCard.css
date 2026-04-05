@@ -1,0 +1,53 @@
+.starring {
+  position: relative;
+  width: 100%;
+  background: #fff;
+  overflow: visible;
+  padding-bottom: 40px;
+}
+
+.starring__perspective {
+  perspective: 700px;
+  width: 107%;
+  margin-left: -3.5%;
+  display: flex;
+  justify-content: center;
+}
+
+.starring__card {
+  width: clamp(320px, 88vw, 1048px);
+  aspect-ratio: 1 / 1.07;
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  transform: perspective(700px) rotateX(48deg);
+  transform-origin: top center;
+}
+
+/* ── Blessings ── */
+.starring__blessings {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px 0;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.starring__blessings.show { opacity: 1; }
+
+.starring__vinayagar {
+  width: 190px;
+  height: auto;
+  margin-bottom: 24px;
+}
+
+.starring__bless-text {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(20px, 3.2vw, 36px);
+  font-weight: 500;
+  color: rgb(230, 195, 122);
+  text-align: center;
+  line-height: 1.8;
+}

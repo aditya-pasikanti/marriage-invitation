@@ -1,0 +1,63 @@
+.names {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: rgb(200, 50, 70);
+}
+
+.names__bg {
+  position: absolute; inset: 0;
+  background-size: 100% auto;
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+}
+
+.names__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px 60px;
+  gap: 12px;
+}
+
+.names__flower {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.names__row {
+  text-align: center;
+}
+
+.names__person {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(40px, 8vw, 100px);
+  font-weight: 500;
+  color: rgb(230, 195, 122);
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+}
+
+.names__weds-big {
+  font-family: 'Cormorant SC', serif;
+  font-size: clamp(32px, 6vw, 80px);
+  font-weight: 500;
+  color: rgb(230, 195, 122);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.names__family {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(16px, 2.5vw, 28px);
+  font-weight: 500;
+  color: rgb(230, 195, 122);
+  text-align: center;
+  line-height: 1.8;
+  margin-bottom: 8px;
+}

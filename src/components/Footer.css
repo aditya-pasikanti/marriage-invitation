@@ -1,0 +1,18 @@
+.footer {
+  background: #111;
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.footer__main {
+  font-family: sans-serif;
+  font-size: 12px;
+  color: rgb(238,238,238);
+}
+.footer__sub {
+  font-family: sans-serif;
+  font-size: 8px;
+  color: rgb(71,71,71);
+}
