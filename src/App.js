@@ -1,5 +1,6 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import config from './config';
 import './styles/global.css';
 import './App.css';
@@ -233,21 +234,55 @@ function GalleryColumn({ images: imgs, index, loaded }) {
     >
       {doubled.map((src, ii) => (
         <img key={ii} className={`gallery__img ${SHAPES[ii % SHAPES.length]}`}
+          style={{ '--stagger': `${(index * 80) + (ii % imgs.length) * 90}ms` }}
           src={loaded ? src : undefined} alt="" decoding="async" />
       ))}
     </div>
   );
 }
 
+/* Wedding-palette petal colors: marigold saffron, jasmine cream, kumkum red, white, gold */
+const PETAL_COLORS = ['#e8a830', '#f5e6c8', '#d4452b', '#fff8e7', '#f2b84b'];
+
+function fireCelebration(origin) {
+  const defaults = {
+    origin,
+    colors: PETAL_COLORS,
+    gravity: 0.55,
+    scalar: 1.3,
+    ticks: 220,
+    disableForReducedMotion: true,
+    shapes: ['circle'],
+  };
+  /* Left burst angling right */
+  confetti({ ...defaults, particleCount: 60, angle: 60, spread: 70, startVelocity: 55, origin: { x: 0.1, y: 0.75 } });
+  /* Right burst angling left */
+  confetti({ ...defaults, particleCount: 60, angle: 120, spread: 70, startVelocity: 55, origin: { x: 0.9, y: 0.75 } });
+  /* Center shower — drifts gently like falling petals */
+  setTimeout(() => {
+    confetti({ ...defaults, particleCount: 80, angle: 90, spread: 120, startVelocity: 35, drift: 0.5, origin: { x: 0.5, y: 0.3 } });
+  }, 250);
+}
+
 function GalleryInner() {
   const ref = useRef(null);
   /* Trigger image loading when gallery is within 500px of viewport — once, permanently */
   const isNear = useInView(ref, { once: true, margin: '500px 0px' });
+  /* Reveal animation fires once when gallery actually enters the viewport */
+  const isRevealed = useInView(ref, { once: true, amount: 0.1 });
   /* Toggle animation play/pause based on actual visibility */
   const isVisible = useInView(ref, { amount: 0 });
 
+  /* Fire flower-petal confetti once when the gallery scrolls into view */
+  useEffect(() => {
+    if (!isRevealed) return;
+    const rect = ref.current?.getBoundingClientRect();
+    const y = rect ? (rect.top + rect.height / 2) / window.innerHeight : 0.5;
+    fireCelebration({ x: 0.5, y: Math.max(0.1, Math.min(0.9, y)) });
+  }, [isRevealed]);
+
   return (
-    <div className={`gallery ${isVisible ? 'gallery--active' : ''}`} ref={ref}>
+    <div className={`gallery ${isVisible ? 'gallery--active' : ''} ${isRevealed ? 'gallery--revealed' : ''}`} ref={ref}>
       <div className="gallery__row">
         {config.gallery.map((col, ci) => (
           <GalleryColumn key={ci} images={col} index={ci} loaded={isNear} />
