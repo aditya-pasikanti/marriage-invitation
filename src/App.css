@@ -110,7 +110,7 @@
    Card (z:2) sits behind — they connect seamlessly at the seam. */
 .hero__card-wrap {
   position: absolute;
-  top: 170vh;
+  top: 160vh;
   left: 50%;
   display: flex;
   justify-content: center;
@@ -157,7 +157,7 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: #2a0808 url('https://framerusercontent.com/images/ZrKMdp6WI7ax9IR0VJA7Ffcse4.webp') center top / cover no-repeat;
+  background: #2a0808 url('https://cdn.shopify.com/s/files/1/0688/7591/1222/files/card.webp?v=1776099133') center top / cover no-repeat;
 }
 
 /* Fold 2: Garland at top → names */
@@ -773,7 +773,7 @@
 
   .hero__card {
     justify-content: center;
-    height: 100svh;
+    height: 80svh;
     width: 80%;
   }
 

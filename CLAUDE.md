@@ -41,4 +41,4 @@ Primary audience is mobile. The hero section uses `svh` units (`220svh` on mobil
 
 ### Images
 
-All images are hosted on `framerusercontent.com`. To swap images, update the URLs in `src/config.js` under the `images` key.
+All images are hosted on Shopify CDN (`cdn.shopify.com`). To swap images, update the URLs in `src/config.js` under the `images` key.
