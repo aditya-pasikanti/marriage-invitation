@@ -733,7 +733,7 @@
    ═══════════════════════════════════════════ */
 @media (max-width: 480px) {
   .hero {
-    height: 232svh;
+    height: 245svh;
     min-height: 1000px;
   }
 
@@ -775,7 +775,7 @@
 
   .hero__card {
     justify-content: center;
-    height: 80svh;
+    height: 90svh;
     width: 80%;
   }
 
@@ -888,6 +888,6 @@
   }
 
   .hero__card {
-    height: 140svh;
+    height: 105svh;
   }
 }
