@@ -210,14 +210,6 @@ function GoldenSection() {
 
       {/* Gallery (parallax photos) */}
       <GalleryInner />
-
-      {/* Food image */}
-      <motion.img className="golden__food" src={images.food} alt="" loading="lazy" decoding="async"
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={SPRING_BOUNCE}
-      />
     </section>
   );
 }

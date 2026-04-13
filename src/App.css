@@ -243,6 +243,8 @@
   position: relative;
   width: 100%;
   background: #e8a830;
+  overflow: hidden;
+  padding-bottom: 20rem;
 }
 
 .golden__bg {
@@ -803,7 +805,7 @@
 
   .bless__fold2 {
     height: auto;
-    padding-top: 5rem;
+    padding-top: 10rem;
   }
 
   .bless__garland {
@@ -814,6 +816,10 @@
 
   .bless__family-line {
     font-size: clamp(24px, 5.5vw, 36px);
+  }
+
+  .golden {
+    padding-bottom: 10rem;
   }
 
   .golden__intro {
