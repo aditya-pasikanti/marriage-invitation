@@ -77,7 +77,7 @@ const config = {
 
   // ─── Audio ───
   audio: {
-    src: `${process.env.PUBLIC_URL || ''}/audio/marriage-invitation-song.mp3`,
+    src: `${process.env.PUBLIC_URL || ''}/audio/marriage-song.mp3`,
     volume: 0.55,
   },
 

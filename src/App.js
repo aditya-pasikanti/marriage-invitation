@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import config from './config';
 import './styles/global.css';
@@ -22,7 +22,7 @@ const SPRING_SOFT = { type: 'spring', stiffness: 60, damping: 20 };
    Sky → text → diyas → temple → 3D card (seamless)
    The card emerges from below the temple.
    ════════════════════════════════════════ */
-function Hero() {
+function Hero({ entered }) {
   const { images, groom, bride, credit, blessings, invitingText, invitingSub } = config;
   const heroRef = useRef(null);
 
@@ -54,7 +54,7 @@ function Hero() {
       <motion.div className="hero__text-wrap" style={{ y: textY, opacity: textOpacity }}>
         <motion.div className="hero__text"
           initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={entered ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ ...SPRING_BOUNCE, delay: 0.3 }}
         >
           <div className="hero__name">{groom.name}</div>
@@ -66,13 +66,15 @@ function Hero() {
       {/* Diyas: outer wrap = scroll parallax; inner img = entrance animation */}
       <motion.div className="hero__diyas-wrap hero__diyas-wrap--l" style={{ y: diyasY }}>
         <motion.img className="hero__diyas" src={images.diyas} alt=""
-          initial={{ opacity: 0, x: -150 }} animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, x: -150 }}
+          animate={entered ? { opacity: 1, x: 0 } : { opacity: 0, x: -150 }}
           transition={{ ...SPRING_BOUNCE, delay: 0.1 }}
         />
       </motion.div>
       <motion.div className="hero__diyas-wrap hero__diyas-wrap--r" style={{ y: diyasY }}>
         <motion.img className="hero__diyas" src={images.diyas} alt=""
-          initial={{ opacity: 0, x: 150 }} animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, x: 150 }}
+          animate={entered ? { opacity: 1, x: 0 } : { opacity: 0, x: 150 }}
           transition={{ ...SPRING_BOUNCE, delay: 0.2 }}
           style={{ scaleX: -1 }}
         />
@@ -83,7 +85,7 @@ function Hero() {
       <motion.div className="hero__temple-wrap" style={{ y: templeY }}>
         <motion.img className="hero__temple" src={images.temple} alt=""
           initial={{ opacity: 0, y: 400 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={entered ? { opacity: 1, y: 0 } : { opacity: 0, y: 400 }}
           transition={{ ...SPRING_SLOW, delay: 0.5 }}
         />
       </motion.div>
@@ -383,57 +385,49 @@ function SaveTheDate() {
 
 /* ════════════════════════════════════════
    BACKGROUND MUSIC
-   Starts on first user interaction (scroll/tap/click/key).
-   Floating mute/unmute toggle in bottom-right.
+   Full-screen welcome overlay — first tap unlocks audio (guaranteed gesture).
+   Floating mute/unmute toggle in bottom-right after entry.
    ════════════════════════════════════════ */
-function BackgroundMusic() {
+function BackgroundMusic({ entered, onEnter }) {
   const { audio } = config;
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
+  const [tied, setTied] = useState(false);
 
-  useEffect(() => {
+  const handleTie = () => {
+    if (tied) return;
+    /* Start audio SYNCHRONOUSLY in the user gesture — required for iOS/Safari. */
     const el = audioRef.current;
-    if (!el) return;
-    el.volume = audio.volume ?? 0.55;
-    el.muted = true;
-
-    /* Muted autoplay is universally allowed — starts silently on load. */
-    el.play().then(() => setIsPlaying(true)).catch(() => {});
-
-    const events = ['pointerdown', 'touchstart', 'click', 'keydown', 'scroll', 'wheel'];
-    const opts = { passive: true, capture: true };
-    let unlocked = false;
-    let removed = false;
-
-    const unbind = () => {
-      if (removed) return;
-      removed = true;
-      events.forEach((e) => window.removeEventListener(e, unlock, opts));
-    };
-
-    /* On first interaction (including scroll), unmute the already-playing audio.
-       Unmuting an active element is allowed even on non-gesture events like scroll. */
-    const unlock = () => {
-      if (unlocked) return;
-      unlocked = true;
+    if (el) {
+      el.volume = audio.volume ?? 0.55;
       el.muted = false;
-      setIsMuted(false);
-      if (el.paused) {
-        el.play().then(() => setIsPlaying(true)).catch(() => {
-          /* Unmuted play blocked — revert to muted playback, wait for a real tap */
-          el.muted = true;
-          setIsMuted(true);
-          unlocked = false;
-          el.play().catch(() => {});
-        });
-      }
-      if (unlocked) unbind();
-    };
+      el.play().then(() => {
+        setIsPlaying(true);
+        setIsMuted(false);
+      }).catch(() => { });
+    }
+    setTied(true);
+    /* Let the full ceremonial tying animation play, then reveal the site. */
+    setTimeout(() => onEnter(), 2800);
+  };
 
-    events.forEach((e) => window.addEventListener(e, unlock, opts));
-    return unbind;
-  }, [audio.volume]);
+  /* Lock page scrolling while the welcome overlay is up. */
+  useEffect(() => {
+    if (entered) return;
+    const { body, documentElement } = document;
+    const prevBodyOverflow = body.style.overflow;
+    const prevHtmlOverflow = documentElement.style.overflow;
+    const prevTouchAction = body.style.touchAction;
+    body.style.overflow = 'hidden';
+    documentElement.style.overflow = 'hidden';
+    body.style.touchAction = 'none';
+    return () => {
+      body.style.overflow = prevBodyOverflow;
+      documentElement.style.overflow = prevHtmlOverflow;
+      body.style.touchAction = prevTouchAction;
+    };
+  }, [entered]);
 
   /* Pause when tab is hidden / page is backgrounded; resume on return. */
   useEffect(() => {
@@ -447,7 +441,7 @@ function BackgroundMusic() {
     };
     const onShow = () => {
       if (wasPlaying) {
-        el.play().catch(() => {});
+        el.play().catch(() => { });
       }
     };
     const onVisibility = () => {
@@ -477,7 +471,7 @@ function BackgroundMusic() {
       el.play().then(() => {
         setIsPlaying(true);
         setIsMuted(false);
-      }).catch(() => {});
+      }).catch(() => { });
       return;
     }
     const next = !isMuted;
@@ -490,22 +484,263 @@ function BackgroundMusic() {
   return (
     <>
       <audio ref={audioRef} src={audio.src} loop preload="auto" playsInline />
-      <button
-        type="button"
-        className={`bgm-toggle ${isPlaying && !isMuted ? 'bgm-toggle--on' : ''}`}
-        onClick={toggle}
-        aria-label={showMuted ? 'Unmute music' : 'Mute music'}
-        title={showMuted ? 'Unmute music' : 'Mute music'}
-      >
-        <span className="bgm-toggle__ring" aria-hidden="true" />
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
-          {showMuted ? (
-            <path d="M3 10v4h4l5 5V5L7 10H3zm13.59 2L19 9.59 17.59 8.17 15.17 10.59 12.76 8.17l-1.42 1.42L13.76 12l-2.42 2.41 1.42 1.42 2.41-2.42 2.42 2.42L19 14.41 16.59 12z" />
-          ) : (
-            <path d="M3 10v4h4l5 5V5L7 10H3zm11.5 2a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 14.5 12zM12 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z" />
-          )}
-        </svg>
-      </button>
+
+      <AnimatePresence>
+        {!entered && (
+          <motion.div
+            className="welcome"
+            role="button"
+            tabIndex={0}
+            onClick={handleTie}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleTie(); }}
+            aria-label="Enter site and play music"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          >
+            <div className="welcome__inner">
+              <motion.div
+                className="welcome__eyebrow"
+                initial={{ opacity: 0, y: 20 }}
+                animate={tied ? { opacity: 0, y: -8 } : { opacity: 1, y: 0 }}
+                transition={tied ? { duration: 0.5, ease: 'easeIn' } : { duration: 0.8, delay: 0.1 }}
+              >
+                You are invited
+              </motion.div>
+              <motion.div
+                className="welcome__names"
+                initial={{ opacity: 0, y: 30 }}
+                animate={tied ? { opacity: 0, y: -12 } : { opacity: 1, y: 0 }}
+                transition={tied ? { duration: 0.5, ease: 'easeIn' } : { duration: 0.9, delay: 0.25 }}
+              >
+                Swagatam
+              </motion.div>
+              <motion.div
+                className="welcome__divider"
+                initial={{ scaleX: 0, opacity: 0 }}
+                animate={tied ? { scaleX: 0.3, opacity: 0 } : { scaleX: 1, opacity: 1 }}
+                transition={tied ? { duration: 0.5, ease: 'easeIn' } : { duration: 0.8, delay: 0.5 }}
+                aria-hidden="true"
+              />
+              <motion.div
+                className="welcome__mangal"
+                initial={{ opacity: 0, y: 10, scale: 1 }}
+                animate={tied
+                  ? { opacity: 1, y: -20, scale: 1.22 }
+                  : { opacity: 1, y: 0, scale: 1 }}
+                transition={tied
+                  ? { duration: 1.0, ease: [0.22, 1, 0.36, 1], delay: 0.1 }
+                  : { duration: 1.0, delay: 0.7 }}
+              >
+                {/* ONE unified SVG: chain + convergence + bail + split-threads + pendants */}
+                <motion.svg
+                  className="welcome__mangal-svg"
+                  viewBox="0 0 440 520"
+                  preserveAspectRatio="xMidYMid meet"
+                  aria-hidden="true"
+                  animate={tied
+                    ? {
+                        filter: [
+                          'drop-shadow(0 2px 6px rgba(0,0,0,0.35))',
+                          'drop-shadow(0 0 28px rgba(255,225,140,0.95))',
+                          'drop-shadow(0 0 16px rgba(255,215,130,0.7))',
+                        ],
+                      }
+                    : { filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.35))' }}
+                  transition={{ duration: 1.2, delay: 1.9, times: [0, 0.5, 1] }}
+                >
+                  <defs>
+                    <radialGradient id="knot-gold" cx="40%" cy="35%" r="70%">
+                      <stop offset="0%" stopColor="#fff2c4" />
+                      <stop offset="55%" stopColor="#e8a830" />
+                      <stop offset="100%" stopColor="#8b5a0a" />
+                    </radialGradient>
+                    <radialGradient id="thali-gold" cx="38%" cy="32%" r="75%">
+                      <stop offset="0%" stopColor="#fff4d0" />
+                      <stop offset="45%" stopColor="#e8a830" />
+                      <stop offset="100%" stopColor="#7a4f08" />
+                    </radialGradient>
+                  </defs>
+
+                  {/* One continuous chain per side — bulges outward in the middle, ends at its
+                      pendant hook. When tied, the two top ends sit APART and are joined by the arc below. */}
+                  <motion.path
+                    fill="none"
+                    stroke="#e0b340"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    initial={false}
+                    animate={{
+                      d: tied
+                        ? 'M 175,78 C 70,160 75,330 195,432'
+                        : 'M 80,40 C 65,180 155,270 195,432',
+                    }}
+                    transition={{ duration: 1.6, delay: tied ? 0.3 : 0, ease: [0.4, 0, 0.2, 1] }}
+                  />
+                  <motion.path
+                    fill="none"
+                    stroke="#e0b340"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    initial={false}
+                    animate={{
+                      d: tied
+                        ? 'M 265,78 C 370,160 365,330 245,432'
+                        : 'M 360,40 C 375,180 285,270 245,432',
+                    }}
+                    transition={{ duration: 1.6, delay: tied ? 0.3 : 0, ease: [0.4, 0, 0.2, 1] }}
+                  />
+
+                  {/* Top connecting arc — wide rounded "back-of-neck" that joins the two ends,
+                      completing the circular loop. Fades in after the chains tie. */}
+                  <motion.path
+                    d="M 175,78 Q 220,28 265,78"
+                    fill="none"
+                    stroke="#e0b340"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: tied ? 1 : 0 }}
+                    transition={{ duration: 0.7, delay: tied ? 1.5 : 0 }}
+                  />
+
+                  {/* Horizontal connector bar just above the pendants — the chain ends here on both
+                      sides, and the pendants hang directly below it (traditional thaali design). */}
+                  <line
+                    x1="193"
+                    y1="432"
+                    x2="247"
+                    y2="432"
+                    stroke="#e0b340"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                  />
+                  {/* Decorative red coral/kumkum beads on the bar */}
+                  <circle cx="210" cy="432" r="1.6" fill="#c62828" stroke="#7a1010" strokeWidth="0.3" />
+                  <circle cx="230" cy="432" r="1.6" fill="#c62828" stroke="#7a1010" strokeWidth="0.3" />
+
+                  {/* Knot that forms at the tying point */}
+                  <motion.g
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={tied ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
+                    transition={{ duration: 0.5, delay: 1.85, ease: [0.34, 1.56, 0.64, 1] }}
+                    style={{ transformOrigin: '220px 50px', transformBox: 'fill-box' }}
+                  >
+                    <circle cx="220" cy="50" r="7" fill="url(#knot-gold)" stroke="#7a4f08" strokeWidth="0.6" />
+                    <circle cx="220" cy="50" r="2.3" fill="#fff2c4" />
+                  </motion.g>
+
+                  {/* Primary sparkle */}
+                  <motion.g
+                    initial={{ opacity: 0, scale: 0, rotate: 0 }}
+                    animate={tied
+                      ? { opacity: [0, 1, 0], scale: [0, 1.6, 0], rotate: 120 }
+                      : { opacity: 0, scale: 0 }}
+                    transition={{ duration: 1.1, delay: 2.1, times: [0, 0.45, 1] }}
+                    style={{ transformOrigin: '220px 50px', transformBox: 'fill-box' }}
+                  >
+                    <path d="M 220,24 L 222,46 L 244,50 L 222,54 L 220,76 L 218,54 L 196,50 L 218,46 Z" fill="#fff2c4" />
+                  </motion.g>
+
+                  {/* Secondary sparkle */}
+                  <motion.g
+                    initial={{ opacity: 0, scale: 0, rotate: 45 }}
+                    animate={tied
+                      ? { opacity: [0, 0.85, 0], scale: [0, 1.25, 0], rotate: 135 }
+                      : { opacity: 0, scale: 0 }}
+                    transition={{ duration: 1.0, delay: 2.2, times: [0, 0.5, 1] }}
+                    style={{ transformOrigin: '220px 50px', transformBox: 'fill-box' }}
+                  >
+                    <path d="M 220,32 L 221,47 L 236,50 L 221,53 L 220,68 L 219,53 L 204,50 L 219,47 Z" fill="#ffe9c7" />
+                  </motion.g>
+
+                  {/* LEFT thali pendant at (195, 458) — hangs directly from the connector bar */}
+                  <g>
+                    <circle cx="195" cy="458" r="25" fill="url(#thali-gold)" stroke="#5a3806" strokeWidth="0.7" />
+                    {Array.from({ length: 16 }).map((_, i) => {
+                      const a = (i / 16) * Math.PI * 2;
+                      const cx = 195 + Math.cos(a) * 26;
+                      const cy = 458 + Math.sin(a) * 26;
+                      return <circle key={`l${i}`} cx={cx} cy={cy} r="1.1" fill="#e8a830" stroke="#5a3806" strokeWidth="0.3" />;
+                    })}
+                    <circle cx="195" cy="458" r="19" fill="none" stroke="#5a3806" strokeWidth="0.5" />
+                    <circle cx="195" cy="458" r="12" fill="none" stroke="#5a3806" strokeWidth="0.35" />
+                    <g transform="translate(195 458)">
+                      <path d="M 0,-9 L 2.5,-2.5 L 9,0 L 2.5,2.5 L 0,9 L -2.5,2.5 L -9,0 L -2.5,-2.5 Z" fill="#5a3806" />
+                      <circle r="2.8" fill="url(#thali-gold)" stroke="#5a3806" strokeWidth="0.3" />
+                      <circle r="1.2" fill="#5a3806" />
+                    </g>
+                    <g fill="#5a3806">
+                      <circle cx="195" cy="445" r="0.75" />
+                      <circle cx="195" cy="471" r="0.75" />
+                      <circle cx="182" cy="458" r="0.75" />
+                      <circle cx="208" cy="458" r="0.75" />
+                    </g>
+                  </g>
+
+                  {/* RIGHT thali pendant at (245, 458) — touches left pendant at x=220 */}
+                  <g>
+                    <circle cx="245" cy="458" r="25" fill="url(#thali-gold)" stroke="#5a3806" strokeWidth="0.7" />
+                    {Array.from({ length: 16 }).map((_, i) => {
+                      const a = (i / 16) * Math.PI * 2;
+                      const cx = 245 + Math.cos(a) * 26;
+                      const cy = 458 + Math.sin(a) * 26;
+                      return <circle key={`r${i}`} cx={cx} cy={cy} r="1.1" fill="#e8a830" stroke="#5a3806" strokeWidth="0.3" />;
+                    })}
+                    <circle cx="245" cy="458" r="19" fill="none" stroke="#5a3806" strokeWidth="0.5" />
+                    <circle cx="245" cy="458" r="12" fill="none" stroke="#5a3806" strokeWidth="0.35" />
+                    <g transform="translate(245 458)">
+                      <path d="M 0,-9 L 2.5,-2.5 L 9,0 L 2.5,2.5 L 0,9 L -2.5,2.5 L -9,0 L -2.5,-2.5 Z" fill="#5a3806" />
+                      <circle r="2.8" fill="url(#thali-gold)" stroke="#5a3806" strokeWidth="0.3" />
+                      <circle r="1.2" fill="#5a3806" />
+                    </g>
+                    <g fill="#5a3806">
+                      <circle cx="245" cy="445" r="0.75" />
+                      <circle cx="245" cy="471" r="0.75" />
+                      <circle cx="232" cy="458" r="0.75" />
+                      <circle cx="258" cy="458" r="0.75" />
+                    </g>
+                  </g>
+                </motion.svg>
+
+                {/* Button: absolutely positioned over the SVG's "neck" area */}
+                <div className="welcome__cta-wrap">
+                  <motion.div
+                    className={`welcome__cta ${tied ? 'welcome__cta--tied' : ''}`}
+                    animate={tied ? { opacity: 0, scale: 0.85 } : { opacity: 1, scale: 1 }}
+                    transition={tied
+                      ? { duration: 0.6, ease: 'easeIn', delay: 0.1 }
+                      : { duration: 0.3 }}
+                  >
+                    {!tied && <span className="welcome__cta-ring" aria-hidden="true" />}
+                    {!tied && <span className="welcome__cta-ring welcome__cta-ring--2" aria-hidden="true" />}
+                    <span>Open Invitation</span>
+                  </motion.div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {entered && (
+        <button
+          type="button"
+          className={`bgm-toggle ${isPlaying && !isMuted ? 'bgm-toggle--on' : ''}`}
+          onClick={toggle}
+          aria-label={showMuted ? 'Unmute music' : 'Mute music'}
+          title={showMuted ? 'Unmute music' : 'Mute music'}
+        >
+          <span className="bgm-toggle__ring" aria-hidden="true" />
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+            {showMuted ? (
+              <path d="M3 10v4h4l5 5V5L7 10H3zm13.59 2L19 9.59 17.59 8.17 15.17 10.59 12.76 8.17l-1.42 1.42L13.76 12l-2.42 2.41 1.42 1.42 2.41-2.42 2.42 2.42L19 14.41 16.59 12z" />
+            ) : (
+              <path d="M3 10v4h4l5 5V5L7 10H3zm11.5 2a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 14.5 12zM12 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z" />
+            )}
+          </svg>
+        </button>
+      )}
     </>
   );
 }
@@ -515,13 +750,14 @@ function BackgroundMusic() {
    Hero+Card → Blessings → Golden(Intro+Story+Gallery+Food) → SaveTheDate
    ════════════════════════════════════════ */
 export default function App() {
+  const [entered, setEntered] = useState(false);
   return (
     <>
-      <Hero />
+      <Hero entered={entered} />
       <Blessings />
       <GoldenSection />
       <SaveTheDate />
-      <BackgroundMusic />
+      <BackgroundMusic entered={entered} onEnter={() => setEntered(true)} />
     </>
   );
 }
