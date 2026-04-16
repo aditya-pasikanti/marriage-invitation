@@ -10,18 +10,18 @@ const config = {
   groom: {
     name: 'Rahul',
     surname: 'Amanchi',
-    parents: 'Smt. Sunita & Shri. Srinivas',
+    parents: 'Shri. Amanchi Srinivas & Smt. Sunita',
     relation: 'Son of',
   },
   bride: {
-    name: 'Lakshmi',
+    name: 'laxmi',
     surname: 'Anagandula',
-    parents: 'Smt. Vanita & Shri. Gopi',
+    parents: 'Shri. Anagandula Gopi & Smt. Uma',
     relation: 'Daughter of',
   },
 
   // ─── Blessings ───
-  blessings: 'With the divine blessings of\nSmt. Sunita & Shri. Srinivas\nSmt. Vanita & Shri. Gopi',
+  blessings: 'With the divine blessings of\nShri. Amanchi Srinivas & Smt. Sunita\nShri. Anagandula Gopi & Smt. Uma',
   invitingText: 'Inviting',
   invitingSub: 'We warmly invite you to join us in our wedding celebration',
 
@@ -32,16 +32,17 @@ const config = {
   events: [
     {
       title: 'Marriage',
-      lines: ['On Sunday, 26th April 2026', 'Morning'],
+      lines: ['On Sunday, 26th April 2026', '10:49 AM'],
     },
     {
       title: 'Reception',
-      lines: ['On Sunday, 26th April 2026', 'Evening'],
+      lines: ['On Sunday, 26th April 2026', '07:30 PM'],
     },
   ],
   venue: {
     label: 'Venue',
-    lines: ['Madhav Party Plot', 'Opp. Sky View Building, Shakti Nagar', 'Surat, Gujarat 395012'],
+    lines: ['Madhav Party Plot, Beside Midas Square, Godadara, Surat'],
+    mapsUrl: 'https://shorturl.at/Kz8Cz',
   },
   requestText: 'We Request your gracious presence on the Auspicious occasion of our marriage',
 
@@ -70,8 +71,14 @@ const config = {
     food: 'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/food.png?v=1776098477',
     kolam: 'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/kolam.png?v=1776098480',
     banner: 'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/banner.png?v=1776098478',
-    couples: 'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couples.png?v=1776098471',
+    couples: 'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-main.jpg?v=1776360651',
     flower: 'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/flower.png?v=1776098476',
+  },
+
+  // ─── Audio ───
+  audio: {
+    src: `${process.env.PUBLIC_URL || ''}/audio/marriage-invitation-song.mp3`,
+    volume: 0.55,
   },
 
   // ─── Gallery Images (5 columns) ───

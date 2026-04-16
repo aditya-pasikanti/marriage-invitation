@@ -13,7 +13,7 @@ export default function SaveTheDate() {
     <section className="std">
       {/* Banner strip */}
       <div className="std__banner">
-        <img src={BANNER} alt="Rahul Weds Lakshmi" />
+        <img src={BANNER} alt="Rahul Weds laxmi" />
       </div>
 
       {/* Couples circle */}
@@ -21,7 +21,7 @@ export default function SaveTheDate() {
         className={`std__couples ${couplesInView ? 'show' : ''}`}
         ref={couplesRef}
       >
-        <img src={COUPLES} alt="Rahul and Lakshmi" loading="lazy" />
+        <img src={COUPLES} alt="Rahul and laxmi" loading="lazy" />
       </div>
 
       {/* We Request text */}

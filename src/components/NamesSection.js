@@ -24,7 +24,7 @@ export default function NamesSection() {
         <div className="names__weds-big">Weds</div>
 
         <div className="names__row">
-          <span className="names__person">Lakshmi</span>
+          <span className="names__person">laxmi</span>
         </div>
 
         <div className="names__family">

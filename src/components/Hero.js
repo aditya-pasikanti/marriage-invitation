@@ -18,7 +18,7 @@ export default function Hero() {
       <div className="hero__text">
         <div className="hero__name">Rahul</div>
         <div className="hero__weds">weds</div>
-        <div className="hero__name">Lakshmi</div>
+        <div className="hero__name">laxmi</div>
       </div>
 
       <img className="hero__diyas hero__diyas--left" src={IMG.diyas} alt="" />

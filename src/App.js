@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import config from './config';
@@ -330,10 +330,30 @@ function SaveTheDate() {
               <img className="std__flower" src={images.flower} alt="" loading="lazy" />
               <div className="std__venue-label grad">{venue.label}</div>
               {venue.lines.map((l, i) => <div className="std__ev-line grad" key={i}>{l}</div>)}
+              {venue.mapsUrl && (
+                <a
+                  className="std__map-link"
+                  href={venue.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open venue in Google Maps"
+                >
+                  <span className="std__map-pulse" aria-hidden="true" />
+                  <span className="std__map-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                      <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
+                    </svg>
+                  </span>
+                  <span className="std__map-label grad">View on Map</span>
+                </a>
+              )}
             </div>
             <div className="std__event">
               <div className="std__ev-title grad">{events[1].title}</div>
               {events[1].lines.map((l, j) => <div className="std__ev-line grad" key={j}>{l}</div>)}
+            </div>
+            <div className="std__event">
+              <div className="std__ev-title grad">Followed by Dinner</div>
             </div>
           </motion.div>
         </motion.div>
@@ -362,8 +382,89 @@ function SaveTheDate() {
 }
 
 /* ════════════════════════════════════════
+   BACKGROUND MUSIC
+   Starts on first user interaction (scroll/tap/click/key).
+   Floating mute/unmute toggle in bottom-right.
+   ════════════════════════════════════════ */
+function BackgroundMusic() {
+  const { audio } = config;
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  const tryPlay = useCallback(() => {
+    const el = audioRef.current;
+    if (!el || isPlaying) return;
+    el.volume = audio.volume ?? 0.55;
+    const p = el.play();
+    if (p && typeof p.then === 'function') {
+      p.then(() => setIsPlaying(true)).catch(() => {});
+    } else {
+      setIsPlaying(true);
+    }
+  }, [audio.volume, isPlaying]);
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+
+    el.play().then(() => setIsPlaying(true)).catch(() => {});
+
+    const onInteract = () => {
+      tryPlay();
+      cleanup();
+    };
+    const events = ['scroll', 'touchstart', 'click', 'keydown', 'pointerdown'];
+    const cleanup = () => events.forEach((e) =>
+      window.removeEventListener(e, onInteract, { passive: true, capture: true })
+    );
+    events.forEach((e) =>
+      window.addEventListener(e, onInteract, { passive: true, capture: true })
+    );
+    return cleanup;
+  }, [tryPlay]);
+
+  const toggle = () => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (!isPlaying) { tryPlay(); return; }
+    if (isMuted) {
+      el.muted = false;
+      setIsMuted(false);
+    } else {
+      el.muted = true;
+      setIsMuted(true);
+    }
+  };
+
+  const showMuted = !isPlaying || isMuted;
+
+  return (
+    <>
+      <audio ref={audioRef} src={audio.src} loop preload="auto" playsInline />
+      <button
+        type="button"
+        className={`bgm-toggle ${isPlaying && !isMuted ? 'bgm-toggle--on' : ''}`}
+        onClick={toggle}
+        aria-label={showMuted ? 'Unmute music' : 'Mute music'}
+        title={showMuted ? 'Unmute music' : 'Mute music'}
+      >
+        <span className="bgm-toggle__ring" aria-hidden="true" />
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+          {showMuted ? (
+            <path d="M3 10v4h4l5 5V5L7 10H3zm13.59 2L19 9.59 17.59 8.17 15.17 10.59 12.76 8.17l-1.42 1.42L13.76 12l-2.42 2.41 1.42 1.42 2.41-2.42 2.42 2.42L19 14.41 16.59 12z" />
+          ) : (
+            <path d="M3 10v4h4l5 5V5L7 10H3zm11.5 2a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 14.5 12zM12 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z" />
+          )}
+        </svg>
+      </button>
+    </>
+  );
+}
+
+/* ════════════════════════════════════════
    APP — section order matches original:
-   Hero+Card → Blessings → Golden(Intro+Story+Gallery+Food) → SaveTheDate 
+   Hero+Card → Blessings → Golden(Intro+Story+Gallery+Food) → SaveTheDate
    ════════════════════════════════════════ */
 export default function App() {
   return (
@@ -372,6 +473,7 @@ export default function App() {
       <Blessings />
       <GoldenSection />
       <SaveTheDate />
+      <BackgroundMusic />
     </>
   );
 }
