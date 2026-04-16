@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import config from './config';
@@ -390,51 +390,99 @@ function BackgroundMusic() {
   const { audio } = config;
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-
-  const tryPlay = useCallback(() => {
-    const el = audioRef.current;
-    if (!el || isPlaying) return;
-    el.volume = audio.volume ?? 0.55;
-    const p = el.play();
-    if (p && typeof p.then === 'function') {
-      p.then(() => setIsPlaying(true)).catch(() => {});
-    } else {
-      setIsPlaying(true);
-    }
-  }, [audio.volume, isPlaying]);
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
+    el.volume = audio.volume ?? 0.55;
+    el.muted = true;
 
+    /* Muted autoplay is universally allowed — starts silently on load. */
     el.play().then(() => setIsPlaying(true)).catch(() => {});
 
-    const onInteract = () => {
-      tryPlay();
-      cleanup();
+    const events = ['pointerdown', 'touchstart', 'click', 'keydown', 'scroll', 'wheel'];
+    const opts = { passive: true, capture: true };
+    let unlocked = false;
+    let removed = false;
+
+    const unbind = () => {
+      if (removed) return;
+      removed = true;
+      events.forEach((e) => window.removeEventListener(e, unlock, opts));
     };
-    const events = ['scroll', 'touchstart', 'click', 'keydown', 'pointerdown'];
-    const cleanup = () => events.forEach((e) =>
-      window.removeEventListener(e, onInteract, { passive: true, capture: true })
-    );
-    events.forEach((e) =>
-      window.addEventListener(e, onInteract, { passive: true, capture: true })
-    );
-    return cleanup;
-  }, [tryPlay]);
+
+    /* On first interaction (including scroll), unmute the already-playing audio.
+       Unmuting an active element is allowed even on non-gesture events like scroll. */
+    const unlock = () => {
+      if (unlocked) return;
+      unlocked = true;
+      el.muted = false;
+      setIsMuted(false);
+      if (el.paused) {
+        el.play().then(() => setIsPlaying(true)).catch(() => {
+          /* Unmuted play blocked — revert to muted playback, wait for a real tap */
+          el.muted = true;
+          setIsMuted(true);
+          unlocked = false;
+          el.play().catch(() => {});
+        });
+      }
+      if (unlocked) unbind();
+    };
+
+    events.forEach((e) => window.addEventListener(e, unlock, opts));
+    return unbind;
+  }, [audio.volume]);
+
+  /* Pause when tab is hidden / page is backgrounded; resume on return. */
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    let wasPlaying = false;
+
+    const onHide = () => {
+      wasPlaying = !el.paused;
+      if (wasPlaying) el.pause();
+    };
+    const onShow = () => {
+      if (wasPlaying) {
+        el.play().catch(() => {});
+      }
+    };
+    const onVisibility = () => {
+      if (document.hidden) onHide(); else onShow();
+    };
+
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', onHide);
+    window.addEventListener('pageshow', onShow);
+    window.addEventListener('blur', onHide);
+    window.addEventListener('focus', onShow);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', onHide);
+      window.removeEventListener('pageshow', onShow);
+      window.removeEventListener('blur', onHide);
+      window.removeEventListener('focus', onShow);
+    };
+  }, []);
 
   const toggle = () => {
     const el = audioRef.current;
     if (!el) return;
-    if (!isPlaying) { tryPlay(); return; }
-    if (isMuted) {
+    if (el.paused) {
       el.muted = false;
-      setIsMuted(false);
-    } else {
-      el.muted = true;
-      setIsMuted(true);
+      el.play().then(() => {
+        setIsPlaying(true);
+        setIsMuted(false);
+      }).catch(() => {});
+      return;
     }
+    const next = !isMuted;
+    el.muted = next;
+    setIsMuted(next);
   };
 
   const showMuted = !isPlaying || isMuted;
