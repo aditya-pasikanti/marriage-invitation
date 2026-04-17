@@ -25,6 +25,13 @@ const config = {
   invitingText: 'Inviting',
   invitingSub: 'We warmly invite you to join us in our wedding celebration',
 
+  // ─── Welcome Overlay Shloka (Ganesha beeja mantra — short & auspicious) ───
+  shloka: {
+    lines: [
+      'ॐ गं गणपतये नमः॥',
+    ],
+  },
+
   // ─── Bride & Groom Intro ───
   introTitle: ['Introducing the', 'Groom and', 'Bride'],
 
@@ -81,35 +88,51 @@ const config = {
     volume: 0.55,
   },
 
-  // ─── Gallery Images (5 columns) ───
+  // ─── Gallery Images (5 columns) — couple-* strictly alternates with gallery-* ───
   gallery: [
     [ // Column 1
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-9.jpg?v=1776099659',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-6.jpg?v=1776444226',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-6.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-1.jpg?v=1776444224',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-3.jpg?v=1776099659',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-4.jpg?v=1776444225',
     ],
     [ // Column 2
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-5.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-2.jpg?v=1776444224',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-1.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-5.jpg?v=1776444225',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-4.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-3.jpg?v=1776444225',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-7.jpg?v=1776099660',
     ],
     [ // Column 3 (center)
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-11.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-4.jpg?v=1776444225',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-8.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-3.jpg?v=1776444225',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-2.jpg?v=1776099661',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-2.jpg?v=1776444224',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-10.jpg?v=1776099661',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-6.jpg?v=1776444226',
     ],
     [ // Column 4
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-9.jpg?v=1776099659',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-1.jpg?v=1776444224',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-6.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-5.jpg?v=1776444225',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-3.jpg?v=1776099659',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-6.jpg?v=1776444226',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-5.jpg?v=1776099660',
     ],
     [ // Column 5
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-1.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-2.jpg?v=1776444224',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-4.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-4.jpg?v=1776444225',
       'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/gallery-7.jpg?v=1776099660',
+      'https://cdn.shopify.com/s/files/1/0688/7591/1222/files/couple-1.jpg?v=1776444224',
     ],
   ],
 };

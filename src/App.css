@@ -830,26 +830,55 @@
   max-width: 92vw;
 }
 
-.welcome__eyebrow {
-  font-family: 'Cormorant Upright', serif;
-  font-size: clamp(14px, 2.6vw, 22px);
-  font-weight: 400;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  opacity: 0.85;
+.welcome__shloka-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
-.welcome__names {
+.welcome__shloka {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  font-family: 'Cormorant SC', serif;
-  font-size: clamp(48px, 11vw, 108px);
-  font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: 0.04em;
-  text-transform: capitalize;
+  gap: 6px;
+  font-family: 'Tiro Devanagari Sanskrit', 'Noto Serif Devanagari', serif;
+  font-size: clamp(24px, 4.6vw, 38px);
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: rgb(244, 216, 156);
+  text-shadow: 0 2px 14px rgba(232, 168, 48, 0.35);
+  max-width: 92vw;
+}
+
+.welcome__shloka-line {
+  display: inline-flex;
+  align-items: baseline;
+  min-height: 1.55em;
+  white-space: pre;
+}
+
+.welcome__shloka-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 4px;
+  background: currentColor;
+  transform: translateY(0.12em);
+  animation: welcome-shloka-caret 0.9s steps(1) infinite;
+}
+
+@keyframes welcome-shloka-caret {
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  50.01%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .welcome__amp {
@@ -957,8 +986,69 @@
 @media (prefers-reduced-motion: reduce) {
 
   .welcome__cta-ring,
-  .welcome__cta-ring--2 {
+  .welcome__cta-ring--2,
+  .welcome__shloka-cursor,
+  .scroll-hint__chevron {
     animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLL HINT — after welcome overlay closes
+   ═══════════════════════════════════════════ */
+.scroll-hint {
+  position: fixed;
+  bottom: clamp(18px, 4vh, 36px);
+  right: 1rem;
+  transform: translateX(-50%);
+  z-index: 1500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 12px;
+  border-radius: 999px;
+  background: rgba(20, 4, 4, 0.55);
+  border: 1px solid rgba(232, 168, 48, 0.45);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.45),
+    0 0 20px rgba(232, 168, 48, 0.2);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  pointer-events: none;
+  color: #ffe6a8;
+}
+
+.scroll-hint__label {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(11px, 1.8vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+.scroll-hint__chevron {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.6));
+  animation: scroll-hint-bounce 1.6s ease-in-out infinite;
+}
+
+@keyframes scroll-hint-bounce {
+
+  0%,
+  100% {
+    transform: rotate(45deg) translate(-3px, -3px);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: rotate(45deg) translate(2px, 2px);
+    opacity: 1;
   }
 }
 
@@ -1260,5 +1350,15 @@
 
   .bless__family-line {
     font-size: clamp(20px, 5.5vw, 28px);
+  }
+}
+
+@media (max-height: 700px) and (max-width: 391px) {
+  .hero {
+    height: 250svh;
+  }
+
+  .hero__card {
+    height: 100svh;
   }
 }

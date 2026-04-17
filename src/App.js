@@ -384,16 +384,69 @@ function SaveTheDate() {
 }
 
 /* ════════════════════════════════════════
+   TYPING SHLOKA — reveals a multi-line Sanskrit shloka character-by-character
+   with a blinking cursor that lives on the current line.
+   ════════════════════════════════════════ */
+function TypingShloka({ lines, speed = 55, startDelay = 350, onComplete }) {
+  const [charIndex, setCharIndex] = useState(0);
+  const fullText = lines.join('\n');
+  const total = fullText.length;
+  const completedRef = useRef(false);
+
+  useEffect(() => {
+    let interval;
+    const start = setTimeout(() => {
+      interval = setInterval(() => {
+        setCharIndex((i) => {
+          const next = i + 1;
+          if (next >= total) clearInterval(interval);
+          return Math.min(next, total);
+        });
+      }, speed);
+    }, startDelay);
+    return () => {
+      clearTimeout(start);
+      if (interval) clearInterval(interval);
+    };
+  }, [total, speed, startDelay]);
+
+  useEffect(() => {
+    if (!completedRef.current && charIndex >= total && total > 0) {
+      completedRef.current = true;
+      onComplete?.();
+    }
+  }, [charIndex, total, onComplete]);
+
+  const visibleLines = fullText.slice(0, charIndex).split('\n');
+  const complete = charIndex >= total;
+  const currentLineIdx = Math.max(0, visibleLines.length - 1);
+
+  return (
+    <div className="welcome__shloka" lang="sa" aria-label="Sanskrit blessing">
+      {lines.map((_, i) => (
+        <div className="welcome__shloka-line" key={i}>
+          <span>{visibleLines[i] ?? ''}</span>
+          {!complete && i === currentLineIdx && (
+            <span className="welcome__shloka-cursor" aria-hidden="true" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════
    BACKGROUND MUSIC
    Full-screen welcome overlay — first tap unlocks audio (guaranteed gesture).
    Floating mute/unmute toggle in bottom-right after entry.
    ════════════════════════════════════════ */
 function BackgroundMusic({ entered, onEnter }) {
-  const { audio } = config;
+  const { audio, shloka } = config;
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [tied, setTied] = useState(false);
+  const [shlokaDone, setShlokaDone] = useState(false);
 
   const handleTie = () => {
     if (tied) return;
@@ -463,6 +516,7 @@ function BackgroundMusic({ entered, onEnter }) {
     };
   }, []);
 
+  // eslint-disable-next-line no-unused-vars
   const toggle = () => {
     const el = audioRef.current;
     if (!el) return;
@@ -479,6 +533,7 @@ function BackgroundMusic({ entered, onEnter }) {
     setIsMuted(next);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const showMuted = !isPlaying || isMuted;
 
   return (
@@ -500,37 +555,41 @@ function BackgroundMusic({ entered, onEnter }) {
           >
             <div className="welcome__inner">
               <motion.div
-                className="welcome__eyebrow"
+                className="welcome__shloka-wrap"
                 initial={{ opacity: 0, y: 20 }}
-                animate={tied ? { opacity: 0, y: -8 } : { opacity: 1, y: 0 }}
-                transition={tied ? { duration: 0.5, ease: 'easeIn' } : { duration: 0.8, delay: 0.1 }}
-              >
-                You are invited
-              </motion.div>
-              <motion.div
-                className="welcome__names"
-                initial={{ opacity: 0, y: 30 }}
                 animate={tied ? { opacity: 0, y: -12 } : { opacity: 1, y: 0 }}
-                transition={tied ? { duration: 0.5, ease: 'easeIn' } : { duration: 0.9, delay: 0.25 }}
+                transition={tied ? { duration: 0.5, ease: 'easeIn' } : { duration: 0.9, delay: 0.15 }}
               >
-                Swagatam
+                <TypingShloka
+                  lines={shloka.lines}
+                  speed={110}
+                  onComplete={() => setShlokaDone(true)}
+                />
               </motion.div>
               <motion.div
                 className="welcome__divider"
                 initial={{ scaleX: 0, opacity: 0 }}
-                animate={tied ? { scaleX: 0.3, opacity: 0 } : { scaleX: 1, opacity: 1 }}
-                transition={tied ? { duration: 0.5, ease: 'easeIn' } : { duration: 0.8, delay: 0.5 }}
+                animate={tied
+                  ? { scaleX: 0.3, opacity: 0 }
+                  : shlokaDone
+                    ? { scaleX: 1, opacity: 1 }
+                    : { scaleX: 0, opacity: 0 }}
+                transition={tied
+                  ? { duration: 0.5, ease: 'easeIn' }
+                  : { duration: 0.7, ease: 'easeOut' }}
                 aria-hidden="true"
               />
               <motion.div
                 className="welcome__mangal"
-                initial={{ opacity: 0, y: 10, scale: 1 }}
+                initial={{ opacity: 0, y: 16, scale: 0.9 }}
                 animate={tied
                   ? { opacity: 1, y: -20, scale: 1.22 }
-                  : { opacity: 1, y: 0, scale: 1 }}
+                  : shlokaDone
+                    ? { opacity: 1, y: 0, scale: 1 }
+                    : { opacity: 0, y: 16, scale: 0.9 }}
                 transition={tied
                   ? { duration: 1.0, ease: [0.22, 1, 0.36, 1], delay: 0.1 }
-                  : { duration: 1.0, delay: 0.7 }}
+                  : { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
               >
                 {/* ONE unified SVG: chain + convergence + bail + split-threads + pendants */}
                 <motion.svg
@@ -540,12 +599,12 @@ function BackgroundMusic({ entered, onEnter }) {
                   aria-hidden="true"
                   animate={tied
                     ? {
-                        filter: [
-                          'drop-shadow(0 2px 6px rgba(0,0,0,0.35))',
-                          'drop-shadow(0 0 28px rgba(255,225,140,0.95))',
-                          'drop-shadow(0 0 16px rgba(255,215,130,0.7))',
-                        ],
-                      }
+                      filter: [
+                        'drop-shadow(0 2px 6px rgba(0,0,0,0.35))',
+                        'drop-shadow(0 0 28px rgba(255,225,140,0.95))',
+                        'drop-shadow(0 0 16px rgba(255,215,130,0.7))',
+                      ],
+                    }
                     : { filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.35))' }}
                   transition={{ duration: 1.2, delay: 1.9, times: [0, 0.5, 1] }}
                 >
@@ -707,13 +766,22 @@ function BackgroundMusic({ entered, onEnter }) {
                 <div className="welcome__cta-wrap">
                   <motion.div
                     className={`welcome__cta ${tied ? 'welcome__cta--tied' : ''}`}
-                    animate={tied ? { opacity: 0, scale: 0.85 } : { opacity: 1, scale: 1 }}
+                    animate={tied
+                      ? { opacity: 0, scale: 0.85 }
+                      : shlokaDone
+                        ? { opacity: 1, scale: [1, 1.08, 1] }
+                        : { opacity: 0, scale: 0.9 }}
                     transition={tied
                       ? { duration: 0.6, ease: 'easeIn', delay: 0.1 }
-                      : { duration: 0.3 }}
+                      : shlokaDone
+                        ? {
+                          opacity: { duration: 0.5, ease: 'easeOut' },
+                          scale: { duration: 1.6, repeat: Infinity, ease: 'easeInOut' },
+                        }
+                        : { duration: 0.3 }}
                   >
-                    {!tied && <span className="welcome__cta-ring" aria-hidden="true" />}
-                    {!tied && <span className="welcome__cta-ring welcome__cta-ring--2" aria-hidden="true" />}
+                    {!tied && shlokaDone && <span className="welcome__cta-ring" aria-hidden="true" />}
+                    {!tied && shlokaDone && <span className="welcome__cta-ring welcome__cta-ring--2" aria-hidden="true" />}
                     <span>Open Invitation</span>
                   </motion.div>
                 </div>
@@ -723,7 +791,7 @@ function BackgroundMusic({ entered, onEnter }) {
         )}
       </AnimatePresence>
 
-      {entered && (
+      {/* {entered && (
         <button
           type="button"
           className={`bgm-toggle ${isPlaying && !isMuted ? 'bgm-toggle--on' : ''}`}
@@ -740,8 +808,42 @@ function BackgroundMusic({ entered, onEnter }) {
             )}
           </svg>
         </button>
-      )}
+      )} */}
     </>
+  );
+}
+
+/* ════════════════════════════════════════
+   SCROLL HINT — floats above the hero after the welcome overlay closes,
+   bounces gently to suggest the page continues, hides on first scroll.
+   ════════════════════════════════════════ */
+function ScrollHint({ entered }) {
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    if (!entered) return;
+    const onScroll = () => {
+      if (window.scrollY > 40) setHidden(true);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [entered]);
+
+  return (
+    <AnimatePresence>
+      {entered && !hidden && (
+        <motion.div
+          className="scroll-hint"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.7, delay: 1.0, ease: 'easeOut' }}
+          aria-hidden="true"
+        >
+          <span className="scroll-hint__chevron" />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -758,6 +860,7 @@ export default function App() {
       <GoldenSection />
       <SaveTheDate />
       <BackgroundMusic entered={entered} onEnter={() => setEntered(true)} />
+      <ScrollHint entered={entered} />
     </>
   );
 }
