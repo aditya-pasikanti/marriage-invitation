@@ -838,9 +838,14 @@ function ScrollHint({ entered }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.7, delay: 1.0, ease: 'easeOut' }}
-          aria-hidden="true"
+          aria-label="Swipe up for more"
+          role="img"
         >
-          <span className="scroll-hint__chevron" />
+          <span className="scroll-hint__arrows" aria-hidden="true">
+            <span className="scroll-hint__arrow" />
+            <span className="scroll-hint__arrow" />
+          </span>
+          <span className="scroll-hint__label">Swipe up</span>
         </motion.div>
       )}
     </AnimatePresence>

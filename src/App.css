@@ -988,8 +988,9 @@
   .welcome__cta-ring,
   .welcome__cta-ring--2,
   .welcome__shloka-cursor,
-  .scroll-hint__chevron {
+  .scroll-hint__arrow {
     animation: none;
+    opacity: 1;
   }
 }
 
@@ -999,14 +1000,13 @@
 .scroll-hint {
   position: fixed;
   bottom: clamp(18px, 4vh, 36px);
-  right: 1rem;
-  transform: translateX(-50%);
+  right: clamp(12px, 3vw, 24px);
   z-index: 1500;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px 12px;
+  gap: 4px;
+  padding: 10px 16px 12px;
   border-radius: 999px;
   background: rgba(20, 4, 4, 0.55);
   border: 1px solid rgba(232, 168, 48, 0.45);
@@ -1019,36 +1019,53 @@
   color: #ffe6a8;
 }
 
-.scroll-hint__label {
-  font-family: 'Cormorant Upright', serif;
-  font-size: clamp(11px, 1.8vw, 14px);
-  font-weight: 500;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+.scroll-hint__arrows {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.6));
 }
 
-.scroll-hint__chevron {
+.scroll-hint__arrow {
   display: block;
   width: 12px;
   height: 12px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.6));
-  animation: scroll-hint-bounce 1.6s ease-in-out infinite;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0;
+  animation: scroll-hint-arrow 1.8s ease-in-out infinite;
 }
 
-@keyframes scroll-hint-bounce {
+.scroll-hint__arrow:nth-child(2) {
+  animation-delay: 0.3s;
+}
 
-  0%,
-  100% {
-    transform: rotate(45deg) translate(-3px, -3px);
-    opacity: 0.6;
+.scroll-hint__label {
+  font-family: 'Cormorant Upright', serif;
+  font-size: clamp(10px, 1.6vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  margin-top: 4px;
+}
+
+@keyframes scroll-hint-arrow {
+  0% {
+    transform: rotate(45deg) translate(4px, 4px);
+    opacity: 0;
   }
 
   50% {
-    transform: rotate(45deg) translate(2px, 2px);
     opacity: 1;
+  }
+
+  100% {
+    transform: rotate(45deg) translate(-4px, -4px);
+    opacity: 0;
   }
 }
 
